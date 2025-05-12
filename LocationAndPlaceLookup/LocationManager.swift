@@ -20,6 +20,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
     var errorMessage: String?
     
+    // callback function - a function that is passed as an argument to another function and executed later, after the original function finishes its operation, essentially notifying the calling ccode when the asynchronous task is complete and providing any necessary results.
+    var locationUpdated: ((CLLocation) -> Void)? // This is a function that can be called, passing in a location
+    
     override init() {  // override init takes preceence ober any other function which exists we're going
         super.init() // first call the init function that is defined in any super-class (parent)
         locationManager.delegate = self
@@ -50,15 +53,17 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     
 }
 
-// Delegate methods that Apple has created * will call, but that we filled out
+// Delegate methods that Apple has created & will call, but that we filled out
 extension LocationManager {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let newLocation = locations.last else { return }
         location = newLocation
+        // Call the callback function to indicate we've updated a location
+        locationUpdated?(newLocation)
         
         // You can uncomment this when you only want to get the location once, not repeatedly
-//        manager.stopUpdatingLocation()
+        manager.stopUpdatingLocation()
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

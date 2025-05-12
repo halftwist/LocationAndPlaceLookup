@@ -17,6 +17,23 @@ struct Place: Identifiable {
         self.mapItem = mapItem
     }
     
+    // initialize a place from just coordinates
+    init(location: CLLocation) async {
+        let geocoder = CLGeocoder()
+        do {
+            guard let placemark = try await geocoder.reverseGeocodeLocation(location).first else {  // returns CLPlacemark
+//                fatalError("No placemark found for location")
+                self.init(mapItem: MKMapItem())
+                return
+            }
+            let mapItem = MKMapItem(placemark: MKPlacemark(placemark: placemark))  // convert to MKPlacemark from CLPlacemark, then use that to create a MKMapItem
+            self.init(mapItem: mapItem)
+         } catch {
+             print("😡🌎GEOCODING ERROR: \(error.localizedDescription)")
+             self.init(mapItem: MKMapItem())
+        }
+    }
+    
     var name: String {
         self.mapItem.name ?? ""
     }
