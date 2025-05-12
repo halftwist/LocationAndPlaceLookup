@@ -40,11 +40,13 @@ struct PlaceLookupView: View {
             }
         }
         .searchable(text: $searchText)
+        .onDisappear {
+            searchTask?.cancel()  // Cancel any outstanding Tasks when View dismisses
+        }
         .onAppear {  // Only need to get searchRegion when View appears
             searchRegion = locationManager.getRegionAroundCurrentLocation() ?? MKCoordinateRegion()
         }
-        .onChange(of: searchTask, { oldValue, newValue in
-            //debouncing - limiting how often a function gets called. Debouncing is especially useful in limiting excess and unnecessary API calls that might be expensive or invoke a rate limit or throttle
+        .onChange(of: searchText) { oldValue, newValue in
 
             searchTask?.cancel()  // Stop any existing Tasks that haven't been completed
             // If search string is empty, clear out the list
@@ -56,6 +58,9 @@ struct PlaceLookupView: View {
             // Create a new search task
             searchTask = Task {
                 do {
+                    //debouncing - limiting how often a function gets called. Debouncing is especially useful in limiting excess and unnecessary API calls that might be expensive or invoke a rate limit or throttle
+                    // Wait 300ms before running the current Task. Any typing before the Task has run cancels the old task. This prevents searches happening quickly if a user types fast, and will reduce chances that Apple ccuts off search because too many searches execute too quickly
+
                     try await Task.sleep(for: .milliseconds(300))
                     
                     if Task.isCancelled { return }
@@ -71,11 +76,11 @@ struct PlaceLookupView: View {
             }
             
             
-        })
+        }
 
     }
 }
 
 #Preview {
-    PlaceLookupView()
+    PlaceLookupView(locationManager: LocationManager())
 }

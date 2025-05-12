@@ -29,7 +29,7 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $sheetIsPresented) {
-            PlaceLookupView()
+            PlaceLookupView(locationManager: locationManager)
         }
     }
 }
