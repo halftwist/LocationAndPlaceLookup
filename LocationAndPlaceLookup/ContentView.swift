@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var locationManager = LocationManager()
+    @State var locationManager = LocationManager()  // gets location upon start of this struct
     @State var selectedPlace: Place?
     @State private var sheetIsPresented = false
 
@@ -39,11 +39,16 @@ struct ContentView: View {
 
         }
         .padding()
-        .task {
+        .task {  // Adds an asynchronous task to perform before this view appears.            print("FileID: \(#fileID)\n")
+            print("Function: \(#function)\n")
+//            print("File: \(#file)\n")
+//            print("Filepath: \(#filePath)\n")
+//            print("Line: \(#line)\n")
             // Get user location once when the view appears
             // Handle case if user already authorized location use
             if let location = locationManager.location {
                 selectedPlace = await Place(location: location)
+                print(selectedPlace ?? "No Place")
             }
             
             // Setup a location callback - this handles when new locations come in after the app launches - it will catch the first locationUpdate, which is what we need, otherwise we won't see the information in the VStack update after the user first authorizes location use.
@@ -51,6 +56,7 @@ struct ContentView: View {
                 // We know we have a new location, so use it to update the selectedPlace
                 Task { // <- So we make it one with Task
                     selectedPlace = await Place(location: location)
+                    print(selectedPlace ?? "No Place")
                 }
             }
         }
